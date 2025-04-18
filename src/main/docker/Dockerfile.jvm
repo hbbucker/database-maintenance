@@ -1,0 +1,3 @@
+FROM quay.io/quarkus/quarkus-micro-image:2.0
+COPY target/*-runner.jar /application.jar
+CMD ["java", "-jar", "/application.jar"]
