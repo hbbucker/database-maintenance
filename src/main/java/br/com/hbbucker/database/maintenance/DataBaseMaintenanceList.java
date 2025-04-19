@@ -1,16 +1,14 @@
-package br.com.hbbucker.database;
+package br.com.hbbucker.database.maintenance;
 
 import br.com.hbbucker.shared.database.DataBaseType;
 import io.quarkus.arc.All;
 import io.quarkus.arc.InstanceHandle;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @ApplicationScoped
-//@RequiredArgsConstructor(onConstructor=@__({@Inject, @All}))
 class DataBaseMaintenanceList {
     @All
     @Inject

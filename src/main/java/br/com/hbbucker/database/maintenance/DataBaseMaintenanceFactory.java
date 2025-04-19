@@ -1,4 +1,4 @@
-package br.com.hbbucker.database;
+package br.com.hbbucker.database.maintenance;
 
 import br.com.hbbucker.shared.database.DataBaseType;
 import jakarta.enterprise.context.ApplicationScoped;

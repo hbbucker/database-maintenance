@@ -1,6 +1,6 @@
 package br.com.hbbucker.usecase.bloat;
 
-import br.com.hbbucker.shared.database.DataBaseType;
+import br.com.hbbucker.shared.database.DataSourceName;
 
-public record FindBloatedIndexesInput(DataBaseType dataBaseType) {
+public record FindBloatedIndexesInput(DataSourceName dataSourceName) {
 }
