@@ -10,6 +10,7 @@ import br.com.hbbucker.shared.database.index.IndexInfo;
 import br.com.hbbucker.shared.database.index.IndexName;
 import br.com.hbbucker.shared.database.table.SchemaName;
 import br.com.hbbucker.shared.database.table.TableName;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
@@ -40,16 +41,17 @@ public class DataBaseCommandJDBC implements DataBaseCommand {
             if (rs.next()) {
                 return translateResultSet(rs, dataSourceName);
             }
-            throw new RuntimeException("Index not found: " + sql);
+            throw new RuntimeException("Index not found");
         } catch (Exception ex) {
-            throw new RuntimeException("Error find index: " + sql, ex);
+            Log.errorf("Error find index: %s", sql, ex);
+            throw new RuntimeException("Error find index", ex);
         }
     }
 
     private IndexInfo translateResultSet(final ResultSet rs, final DataSourceName dataSourceName) throws SQLException {
         return IndexInfo.builder()
                 .dataSource(dataSourceName)
-                .schemaName(new SchemaName(rs.getString("schema")))
+                .schemaName(new SchemaName(rs.getString("schema_name")))
                 .indexName(new IndexName(rs.getString("index_name")))
                 .tableName(new TableName(rs.getString("table_name")))
                 .bloatRatio(new BloatRatio(rs.getDouble("bloat_ratio")))

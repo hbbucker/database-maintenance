@@ -39,6 +39,6 @@ class SQLInjectionMonitor {
 
     private static void logSQLInjectionAttempt(String sqlQuery) {
         Log.error("Potential SQL Injection Attempt Detected: " + sqlQuery);
-        throw new RuntimeException("Potential SQL Injection Attempt Detected: " + sqlQuery);
+        throw new RuntimeException("Potential SQL Injection Attempt Detected");
     }
 }

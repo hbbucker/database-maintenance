@@ -6,6 +6,7 @@ import br.com.hbbucker.shared.database.table.SchemaName;
 import br.com.hbbucker.usecase.bloat.FindBloatedIndexesInput;
 import br.com.hbbucker.usecase.bloat.FindBloatedIndexesUC;
 import br.com.hbbucker.usecase.find.datasource.FindAllDataSourcesUC;
+import br.com.hbbucker.usecase.staus.GetStatusIndexProcessUC;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -25,6 +26,7 @@ public class IndexController {
     private final ProducerTemplate producerTemplate;
     private final FindBloatedIndexesUC findBloatedIndexes;
     private final FindAllDataSourcesUC findAllDataSources;
+    private final GetStatusIndexProcessUC getStatusIndexProcess;
 
     @POST
     @Path("{dataSource}/index/recreate/all")
@@ -47,8 +49,8 @@ public class IndexController {
 
         Map<String, Object> headers = new HashMap<>();
         headers.put("x-datasource-name", dataSourceName);
-        headers.put("x-index-name", indexName);
         headers.put("x-schema-name", schemaName);
+        headers.put("x-index-name", indexName);
 
         CompletableFuture.runAsync(() -> producerTemplate.sendBodyAndHeaders("direct:rebuild-index", (Object) null, headers));
         return Response.accepted("Index maintenance pipeline started.").build();
@@ -70,5 +72,11 @@ public class IndexController {
     @Path("datasources")
     public Response getDatasource() {
         return Response.ok(findAllDataSources.execute(null)).build();
+    }
+
+    @GET
+    @Path("index/status")
+    public Response getIndexesStatus() {
+        return Response.ok(getStatusIndexProcess.execute(null)).build();
     }
 }
