@@ -2,12 +2,14 @@ package br.com.hbbucker.database;
 
 import br.com.hbbucker.database.connection.ConnectionProperties;
 import br.com.hbbucker.shared.database.DataBaseType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Builder
+@RegisterForReflection
 public class DataSourceProperties {
     @Setter
     private String sourceName;

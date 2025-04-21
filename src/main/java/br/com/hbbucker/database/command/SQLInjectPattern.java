@@ -1,11 +1,13 @@
 package br.com.hbbucker.database.command;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.experimental.UtilityClass;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 @UtilityClass
+@RegisterForReflection
 class SQLInjectPattern {
     public static final Pattern[] SQL_INJECTION_PATTERNS = {
             // Condições sempre verdadeiras

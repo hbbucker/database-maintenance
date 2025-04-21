@@ -1,12 +1,14 @@
 package br.com.hbbucker.usecase.find.datasource;
 
 import br.com.hbbucker.shared.database.DataBaseType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RegisterForReflection
 public class FindAllDataSourcesOutput {
     @Getter
     private List<DSProperties> dataSources;

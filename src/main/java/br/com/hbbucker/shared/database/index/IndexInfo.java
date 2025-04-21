@@ -4,11 +4,13 @@ import br.com.hbbucker.shared.database.DataSourceName;
 import br.com.hbbucker.shared.database.ddl.DDLDefinition;
 import br.com.hbbucker.shared.database.table.SchemaName;
 import br.com.hbbucker.shared.database.table.TableName;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Getter;
 
 @Builder
 @Getter
+@RegisterForReflection
 public class IndexInfo {
     private DataSourceName dataSource;
     private SchemaName schemaName;

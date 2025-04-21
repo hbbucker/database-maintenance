@@ -1,8 +1,10 @@
 package br.com.hbbucker.database.maintenance.postgresql;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
+@RegisterForReflection
 class PostgreSQLHelper {
     public static final String INDEX_CONCURRENTLY = "INDEX CONCURRENTLY %s";
     public static final String DROP_INDEX = "DROP INDEX CONCURRENTLY IF EXISTS %s.%s";

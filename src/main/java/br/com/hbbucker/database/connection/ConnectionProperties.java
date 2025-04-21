@@ -1,11 +1,13 @@
 package br.com.hbbucker.database.connection;
 
 import br.com.hbbucker.shared.database.DataBaseType;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Builder;
 import lombok.Setter;
 
 @Builder
 @Setter
+@RegisterForReflection
 public class ConnectionProperties {
     private DataBaseType dbType;
     private String host;

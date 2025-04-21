@@ -8,3 +8,6 @@ in databases, using Java with Quarkus, Apache Camel, and Prometheus for observab
 
 ### [Português](https://github.com/hbbucker/database-maintenance/blob/master/README-pt_br.md)
 ### [English](https://github.com/hbbucker/database-maintenance/blob/master/README-en.md)
+
+## Docker
+[Run with docker](https://github.com/hbbucker/database-maintenance/blob/master/src/main/docker/README.md)
