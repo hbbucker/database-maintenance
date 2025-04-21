@@ -1,9 +1,4 @@
-#FROM quay.io/quarkus/quarkus-micro-image:2.0
-#COPY target/*-runner.jar /application.jar
-#CMD ["java", "-jar", "/application.jar"]
-# quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.1-jdk-21
-# Stage 1: Build the native executable
-FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.0-jdk-17 AS build
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.1-jdk-21 AS build
 
 USER root
 RUN microdnf module enable -y nodejs:20 && \
