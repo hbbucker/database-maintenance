@@ -6,7 +6,7 @@ import br.com.hbbucker.shared.database.index.IndexInfo;
 import java.util.List;
 
 public interface DataBaseCommand {
-    IndexInfo getIndexInfo(final DataSourceName dataSourceName, final String sql);
-    List<IndexInfo> getAllIndex(final DataSourceName dataSourceName, final String sql);
-    void executeDDL(final DataSourceName dataSourceName, final String ddl) throws Exception;
+    IndexInfo fetchIndexInfo(DataSourceName dataSourceName, String sql);
+    List<IndexInfo> fetchAllIndexes(DataSourceName dataSourceName, String sql);
+    void executeDDLCommand(DataSourceName dataSourceName, String ddl) throws Exception;
 }

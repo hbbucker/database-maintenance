@@ -10,17 +10,17 @@ import lombok.Setter;
 @Getter
 @Builder
 @RegisterForReflection
-public class DataSourceProperties {
+public final class DataSourceProperties {
     @Setter
     private String sourceName;
     @Builder.Default
     private ConnectionProperties properties = ConnectionProperties.builder().build();
 
-    public void setDbType(DataBaseType dataBaseType) {
+    public void setDbType(final DataBaseType dataBaseType) {
         properties.setDbType(dataBaseType);
     }
 
-    public void setHost(String value) {
+    public void setHost(final String value) {
         properties.setHost(value);
     }
 
@@ -28,15 +28,15 @@ public class DataSourceProperties {
         properties.setPort(i);
     }
 
-    public void setUser(String value) {
+    public void setUser(final String value) {
         properties.setUser(value);
     }
 
-    public void setPassword(String value) {
+    public void setPassword(final String value) {
         properties.setPassword(value);
     }
 
-    public void setDatabase(String value) {
+    public void setDatabase(final String value) {
         properties.setDatabase(value);
     }
 }

@@ -15,15 +15,26 @@ import java.util.stream.Collectors;
 public abstract class CacheCaffeine<T> implements CacheInterface<T> {
     private final Cache cache;
 
+    /**
+     * Put a value in the cache.
+     *
+     * @param key
+     * @param value
+     */
     @Override
-    public void put(String key, T value) {
+    public void put(final String key, final T value) {
         CompletableFuture<T> valueFuture = CompletableFuture.completedFuture(value);
         cache.as(CaffeineCache.class).put(key, valueFuture);
 
     }
 
+    /**
+     * Remove a value from the cache.
+     *
+     * @param key
+     */
     @Override
-    public void remove(String key) {
+    public void remove(final String key) {
         cache.as(CaffeineCache.class).invalidate(key)
                 .subscribe().with(
                         result -> Log.info("Cache Removed " + result),
@@ -31,8 +42,14 @@ public abstract class CacheCaffeine<T> implements CacheInterface<T> {
                 );
     }
 
+    /**
+     * Get a value from the cache.
+     *
+     * @param key
+     * @return value.
+     */
     @Override
-    public T get(String key) {
+    public T get(final String key) {
         try {
             return (T) cache.as(CaffeineCache.class)
                     .getIfPresent(key)
@@ -44,6 +61,11 @@ public abstract class CacheCaffeine<T> implements CacheInterface<T> {
         }
     }
 
+    /**
+     * Get all keys from the cache.
+     *
+     * @return set of keys.
+     */
     public Set<String> getKeys() {
         return cache.as(CaffeineCache.class).keySet()
                 .stream()

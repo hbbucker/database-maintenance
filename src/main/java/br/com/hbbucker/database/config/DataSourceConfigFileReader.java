@@ -1,7 +1,7 @@
 package br.com.hbbucker.database.config;
 
-import br.com.hbbucker.shared.database.DataBaseType;
 import br.com.hbbucker.database.DataSourceProperties;
+import br.com.hbbucker.shared.database.DataBaseType;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,10 +15,11 @@ import java.util.Properties;
 
 @ApplicationScoped
 @RequiredArgsConstructor(onConstructor = @__({@Inject}))
-public class DataSourceConfigFileReader implements DataSourceConfig {
+public final class DataSourceConfigFileReader implements DataSourceConfig {
 
+    public static final int SIZE_SPLITED_PROPERTY = 3;
     @ConfigProperty(name = "database.config.file")
-    String filePath;
+    private String filePath;
 
     @Override
     public DataSourcePropertiesList loadDatabaseConfigurations() {
@@ -26,7 +27,7 @@ public class DataSourceConfigFileReader implements DataSourceConfig {
         return parseProperties(properties);
     }
 
-    private Properties loadPropertiesFromFile(String filePath) {
+    private Properties loadPropertiesFromFile(final String filePath) {
         Properties properties = new Properties();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             properties.load(reader);
@@ -36,7 +37,7 @@ public class DataSourceConfigFileReader implements DataSourceConfig {
         return properties;
     }
 
-    private DataSourcePropertiesList parseProperties(Properties properties) {
+    private DataSourcePropertiesList parseProperties(final Properties properties) {
         DataSourcePropertiesList databaseConfigurations = new DataSourcePropertiesList();
 
         properties.stringPropertyNames()
@@ -47,11 +48,12 @@ public class DataSourceConfigFileReader implements DataSourceConfig {
         return databaseConfigurations;
     }
 
-    private boolean isDatabaseProperty(String propertyName) {
-        return propertyName.startsWith("database.") && propertyName.split("\\.").length == 3;
+    private boolean isDatabaseProperty(final String propertyName) {
+        return propertyName.startsWith("database.")
+                && propertyName.split("\\.").length == SIZE_SPLITED_PROPERTY;
     }
 
-    private void processProperty(String propertyName, Properties properties, DataSourcePropertiesList databaseConfigurations) {
+    private void processProperty(final String propertyName, final Properties properties, final DataSourcePropertiesList databaseConfigurations) {
         String[] parts = propertyName.split("\\.");
         String sourceName = parts[1];
         String propertyKey = parts[2];
@@ -63,7 +65,10 @@ public class DataSourceConfigFileReader implements DataSourceConfig {
         applyProperty(sourceProperties, propertyKey, value);
     }
 
-    private void applyProperty(DataSourceProperties sourceProperties, String propertyKey, String value) {
+    private void applyProperty(
+            final DataSourceProperties sourceProperties,
+            final String propertyKey,
+            final String value) {
         switch (propertyKey) {
             case "type":
                 sourceProperties.setDbType(DataBaseType.valueOf(value));
@@ -88,7 +93,7 @@ public class DataSourceConfigFileReader implements DataSourceConfig {
         }
     }
 
-    private int parsePort(String value) {
+    private int parsePort(final String value) {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
@@ -96,7 +101,7 @@ public class DataSourceConfigFileReader implements DataSourceConfig {
         }
     }
 
-    private void logUnknownProperty(String propertyKey) {
+    private void logUnknownProperty(final String propertyKey) {
         Log.error("Unknown property: " + propertyKey);
     }
 }

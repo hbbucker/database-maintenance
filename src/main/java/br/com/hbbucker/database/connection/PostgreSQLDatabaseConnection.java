@@ -7,13 +7,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 @ApplicationScoped
-public class PostgreSQLDatabaseConnection implements DataBaseConnection {
+public final class PostgreSQLDatabaseConnection implements DataBaseConnection {
 
-    public static final String JDBC_STRING = "jdbc:postgresql://%s:%s/%s";
+    private static final String JDBC_TEMPLATE = "jdbc:postgresql://%s:%s/%s";
 
     @Override
-    public Connection createConnection(ConnectionProperties properties) throws Exception {
-        String jdbcUrl = JDBC_STRING.formatted(properties.host(), properties.port(), properties.database());
+    public Connection createConnection(final ConnectionProperties properties) throws Exception {
+        String jdbcUrl = JDBC_TEMPLATE.formatted(properties.host(), properties.port(), properties.database());
         return DriverManager.getConnection(jdbcUrl, properties.user(), properties.password());
     }
 

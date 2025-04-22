@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RegisterForReflection
-public class DataSourcePropertiesList {
+public final class DataSourcePropertiesList {
     private final ConcurrentHashMap<String, DataSourceProperties> map = new ConcurrentHashMap<>();
 
-    public DataSourceProperties get(String sourceName) {
+    public DataSourceProperties get(final String sourceName) {
         return map.computeIfAbsent(sourceName, key -> DataSourceProperties.builder().build());
     }
 

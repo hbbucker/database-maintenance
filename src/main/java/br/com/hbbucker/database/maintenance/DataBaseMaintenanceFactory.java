@@ -7,10 +7,11 @@ import lombok.RequiredArgsConstructor;
 
 @ApplicationScoped
 @RequiredArgsConstructor(onConstructor = @__({@Inject}))
-public class DataBaseMaintenanceFactory {
-    private final DataBaseMaintenanceList dataBaseMaintenanceList;
+public final class DataBaseMaintenanceFactory {
 
-    public DataBaseMaintenance get(DataBaseType dataBaseType) {
-        return dataBaseMaintenanceList.get(dataBaseType);
+    private final DataBaseMaintenanceList maintenanceList;
+
+    public DataBaseMaintenance getMaintenanceByType(final DataBaseType dataBaseType) {
+        return maintenanceList.get(dataBaseType);
     }
 }

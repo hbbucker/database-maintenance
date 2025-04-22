@@ -11,7 +11,7 @@ import lombok.Getter;
 @Builder
 @Getter
 @RegisterForReflection
-public class IndexInfo {
+public final class IndexInfo {
     private DataSourceName dataSource;
     private SchemaName schemaName;
     private IndexName indexName;
@@ -19,7 +19,7 @@ public class IndexInfo {
     private BloatRatio bloatRatio;
     private DDLDefinition ddl;
 
-    public String refactorCreateIndex(String oldValue, String newValue) {
+    public String refactorCreateIndex(final String oldValue, final String newValue) {
         return ddl.ddl().replace(oldValue, newValue);
     }
 }

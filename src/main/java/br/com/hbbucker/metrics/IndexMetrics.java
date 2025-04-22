@@ -6,12 +6,13 @@ import io.micrometer.core.instrument.Timer;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 @ApplicationScoped
-public class IndexMetrics {
+@RequiredArgsConstructor(onConstructor_ = {@Inject})
+public final class IndexMetrics {
 
-    @Inject
-    MeterRegistry registry;
+    private final MeterRegistry registry;
 
     private Counter indexesRebuilt;
     private Counter indexesFailed;
@@ -53,7 +54,7 @@ public class IndexMetrics {
         return Timer.start(registry);
     }
 
-    public void stopTimer(Timer.Sample sample) {
+    public void stopTimer(final Timer.Sample sample) {
         sample.stop(executionTimer);
     }
 }

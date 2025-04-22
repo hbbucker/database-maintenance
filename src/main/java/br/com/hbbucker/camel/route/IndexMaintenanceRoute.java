@@ -1,18 +1,19 @@
 package br.com.hbbucker.camel.route;
 
 import br.com.hbbucker.metrics.IndexMetrics;
+import br.com.hbbucker.usecase.bloat.FindBloatedIndexesUC;
 import br.com.hbbucker.usecase.find.index.FindIndexByNameUC;
+import br.com.hbbucker.usecase.recreate.RecreateIndexUC;
 import io.micrometer.core.instrument.Timer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import br.com.hbbucker.usecase.bloat.FindBloatedIndexesUC;
-import br.com.hbbucker.usecase.recreate.RecreateIndexUC;
 
 @ApplicationScoped
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
-public class IndexMaintenanceRoute extends RouteBuilder {
+public final class IndexMaintenanceRoute extends RouteBuilder {
 
     private final IndexMetrics metrics;
     private final FindBloatedIndexesUC findBloatedIndexesUC;
@@ -21,33 +22,43 @@ public class IndexMaintenanceRoute extends RouteBuilder {
 
     @Override
     public void configure() {
+        configureRebuildAllIndexRoute();
+        configureRebuildIndexByNameRoute();
+    }
+
+    private void configureRebuildAllIndexRoute() {
         from("direct:rebuild-indexes")
                 .routeId("rebuild-indexes")
-                .process(exchange -> exchange.setProperty("timerSample", metrics.startTimer()))
+                .process(this::startTimer)
                 .log("Starting index maintenance...")
                 .process(findBloatedIndexesUC)
                 .split(body())
                 .parallelProcessing(false)
                 .process(recreateIndexUC)
-                .process(exchange -> {
-                    Timer.Sample sample = exchange.getProperty("timerSample", Timer.Sample.class);
-                    metrics.stopTimer(sample);
-                })
+                .process(this::stopTimer)
                 .log("Index maintenance completed.");
+    }
 
-
+    private void configureRebuildIndexByNameRoute() {
         from("direct:rebuild-index")
                 .routeId("rebuild-index")
-                .process(exchange -> exchange.setProperty("timerSample", metrics.startTimer()))
+                .process(this::startTimer)
                 .log("Starting index maintenance...")
                 .process(findIndexByNameUC)
                 .split(body())
                 .parallelProcessing(false)
                 .process(recreateIndexUC)
-                .process(exchange -> {
-                    Timer.Sample sample = exchange.getProperty("timerSample", Timer.Sample.class);
-                    metrics.stopTimer(sample);
-                })
+                .process(this::stopTimer)
                 .log("Index maintenance completed.");
     }
+
+    private void startTimer(final Exchange exchange) {
+        exchange.setProperty("timerSample", metrics.startTimer());
+    }
+
+    private void stopTimer(final Exchange exchange) {
+        Timer.Sample sample = exchange.getProperty("timerSample", Timer.Sample.class);
+        metrics.stopTimer(sample);
+    }
+
 }

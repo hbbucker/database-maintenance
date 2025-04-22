@@ -13,30 +13,31 @@ import java.util.Set;
 
 @ApplicationScoped
 @RequiredArgsConstructor(onConstructor = @__({@Inject}))
-public class CacheStatusService {
+public final class CacheStatusService {
     public static final String CACHE_KEY = "ds:status:%s:%s:%s";
     private final ProcessStatusCache cache;
 
     public void put(
-            DataSourceName dataSourceName,
-            TableName tableName,
-            IndexName indexName,
-            ProcessStatus status) {
+            final DataSourceName dataSourceName,
+            final TableName tableName,
+            final IndexName indexName,
+            final ProcessStatus status) {
 
         cache.put(getKey(dataSourceName, tableName, indexName), status);
     }
 
     public ProcessStatus get(
-            DataSourceName dataSourceName,
-            TableName tableName,
-            IndexName indexName) {
+            final DataSourceName dataSourceName,
+            final TableName tableName,
+            final IndexName indexName) {
 
         return cache.get(getKey(dataSourceName, tableName, indexName));
     }
 
-    public void remove(DataSourceName dataSourceName,
-                       TableName tableName,
-                       IndexName indexName) {
+    public void remove(
+            final DataSourceName dataSourceName,
+            final TableName tableName,
+            final IndexName indexName) {
         cache.remove(getKey(dataSourceName, tableName, indexName));
     }
 
@@ -44,7 +45,10 @@ public class CacheStatusService {
         return cache.getKeys();
     }
 
-    private String getKey(DataSourceName dataSourceName, TableName tableName, IndexName indexName) {
+    private String getKey(
+            final DataSourceName dataSourceName,
+            final TableName tableName,
+            final IndexName indexName) {
         return CACHE_KEY.formatted(dataSourceName.name(), tableName.name(), indexName.name());
     }
 
