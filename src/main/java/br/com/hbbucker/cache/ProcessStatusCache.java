@@ -12,7 +12,7 @@ import jakarta.inject.Singleton;
 public class ProcessStatusCache extends CacheCaffeine<ProcessStatus> {
 
     @Inject
-    public ProcessStatusCache(@CacheName("local-cache") Cache cache) {
+    public ProcessStatusCache(final @CacheName("local-cache") Cache cache) {
         super(cache);
     }
 }

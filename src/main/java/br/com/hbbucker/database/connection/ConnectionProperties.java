@@ -8,7 +8,7 @@ import lombok.Setter;
 @Builder
 @Setter
 @RegisterForReflection
-public class ConnectionProperties {
+public final class ConnectionProperties {
     private DataBaseType dbType;
     private String host;
     private int port;

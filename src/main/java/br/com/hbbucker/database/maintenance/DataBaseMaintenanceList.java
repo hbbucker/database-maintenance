@@ -1,5 +1,7 @@
 package br.com.hbbucker.database.maintenance;
 
+// ...existing imports...
+
 import br.com.hbbucker.shared.database.DataBaseType;
 import io.quarkus.arc.All;
 import io.quarkus.arc.InstanceHandle;
@@ -10,16 +12,17 @@ import java.util.List;
 
 @ApplicationScoped
 class DataBaseMaintenanceList {
+
     @All
     @Inject
-    protected List<InstanceHandle<DataBaseMaintenance>> list;
+    private List<InstanceHandle<DataBaseMaintenance>> maintenanceInstances;
 
-    protected DataBaseMaintenance get(DataBaseType dataBaseType) {
-        return list.stream()
-                .filter(instanceHandle -> dataBaseType == instanceHandle.get().getDataBaseType())
+    protected DataBaseMaintenance get(final DataBaseType dataBaseType) {
+        return maintenanceInstances.stream()
+                .filter(instance -> dataBaseType == instance.get().getSupportedDataBaseType())
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No DataBaseMaintenance found for type: " + dataBaseType))
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No DataBaseMaintenance implementation found for type: " + dataBaseType))
                 .get();
     }
-
 }

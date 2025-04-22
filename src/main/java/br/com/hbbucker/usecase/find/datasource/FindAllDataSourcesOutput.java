@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RegisterForReflection
-public class FindAllDataSourcesOutput {
+public final class FindAllDataSourcesOutput {
     @Getter
     private List<DSProperties> dataSources;
 
-    public void addDataSource(DSProperties dsProperties) {
+    public void addDataSource(final DSProperties dsProperties) {
         if (dataSources == null) {
             dataSources = new ArrayList<>();
         }

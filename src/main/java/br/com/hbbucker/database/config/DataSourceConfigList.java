@@ -11,13 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 @RequiredArgsConstructor(onConstructor = @__({@Inject}))
-public class DataSourceConfigList {
+public final class DataSourceConfigList {
 
     private final DataSourceConfig config;
-    private static final ConcurrentHashMap<DataSourceName, DataSourceProperties> cache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<DataSourceName, DataSourceProperties> CACHE = new ConcurrentHashMap<>();
 
     protected DataSourceProperties get(final DataSourceName dataSourceName) {
-        return cache.computeIfAbsent(dataSourceName, key -> {
+        return CACHE.computeIfAbsent(dataSourceName, key -> {
             DataSourceProperties dataSourceConfig = config.loadDatabaseConfigurations().get(dataSourceName.name());
             if (dataSourceConfig == null) {
                 throw new IllegalArgumentException("No DataSource Config found for name: " + dataSourceName.name());
@@ -26,7 +26,7 @@ public class DataSourceConfigList {
         });
     }
 
-    public List<DataSourceProperties> getAll(){
+    public List<DataSourceProperties> getAll() {
         return config.loadDatabaseConfigurations().getAll();
     }
 }

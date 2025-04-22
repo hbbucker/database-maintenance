@@ -7,11 +7,11 @@ import lombok.RequiredArgsConstructor;
 
 @ApplicationScoped
 @RequiredArgsConstructor(onConstructor = @__({@Inject}))
-public class DataBaseConnectionFactory {
+public final class DataBaseConnectionFactory {
 
-    private final DataBaseConnectionList dataBaseConnectionList;
+    private final DataBaseConnectionList connectionList;
 
-    public DataBaseConnection get(DataBaseType dbType) {
-        return dataBaseConnectionList.get(dbType);
+    public DataBaseConnection getConnectionByType(final DataBaseType dbType) {
+        return connectionList.get(dbType);
     }
 }

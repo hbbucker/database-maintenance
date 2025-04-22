@@ -14,11 +14,11 @@ import java.util.List;
 
 @Getter
 @RegisterForReflection
-public class GetStatusIndexProcessOutput {
+public final class GetStatusIndexProcessOutput {
 
     private List<IndexProcessing> indexProcessing = new ArrayList<>();
 
-    public void add(IndexProcessing indexProcessing) {
+    public void add(final IndexProcessing indexProcessing) {
         if (this.indexProcessing == null) {
             this.indexProcessing = new java.util.ArrayList<>();
         }
@@ -28,10 +28,10 @@ public class GetStatusIndexProcessOutput {
     @Builder
     @Getter
     public static class IndexProcessing {
-        DataSourceName dataSourceName;
-        TableName tableName;
-        IndexName indexName;
+        private DataSourceName dataSourceName;
+        private TableName tableName;
+        private IndexName indexName;
         @Setter
-        ProcessStatus status;
+        private ProcessStatus status;
     }
 }

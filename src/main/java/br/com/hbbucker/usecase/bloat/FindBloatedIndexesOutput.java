@@ -6,4 +6,5 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.List;
 
 @RegisterForReflection
-public record FindBloatedIndexesOutput (List<IndexInfo> indexInfos) { }
+public record FindBloatedIndexesOutput(List<IndexInfo> indexInfos) {
+}

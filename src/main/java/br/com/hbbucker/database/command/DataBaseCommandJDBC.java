@@ -24,31 +24,75 @@ import java.util.List;
 
 @ApplicationScoped
 @RequiredArgsConstructor(onConstructor = @__({@Inject}))
-public class DataBaseCommandJDBC implements DataBaseCommand {
+public final class DataBaseCommandJDBC implements DataBaseCommand {
 
-    private final DataBaseConnectionFactory dataBaseConnectionFactory;
-    private final DataSourceConfigFactory dataSourceConfigFactory;
+    private final DataBaseConnectionFactory connectionFactory;
+    private final DataSourceConfigFactory configFactory;
 
-    public IndexInfo getIndexInfo(final DataSourceName dataSourceName, final String sql) {
+    @Override
+    public IndexInfo fetchIndexInfo(final DataSourceName dataSourceName, final String sql) {
+        validateSQL(sql);
+        DataSourceProperties dataSource = configFactory.get(dataSourceName);
 
-        SQLInjectionMonitor.monitorSQLInjection(sql);
-
-        DataSourceProperties dataSource = dataSourceConfigFactory.get(dataSourceName);
-
-        try (Connection conn = dataBaseConnectionFactory.get(dataSource.getProperties().dbType()).createConnection(dataSource.getProperties());
+        try (Connection conn = createConnection(dataSource);
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                return translateResultSet(rs, dataSourceName);
+                return mapToIndexInfo(rs, dataSourceName);
             }
-            throw new RuntimeException("Index not found");
-        } catch (Exception ex) {
-            Log.errorf("Error find index: %s", sql, ex);
-            throw new RuntimeException("Error find index", ex);
+            throw new IllegalStateException("Index not found for query: " + sql);
+        } catch (SQLException ex) {
+            Log.errorf("Error fetching index info: %s", sql, ex);
+            throw new RuntimeException("Error fetching index info", ex);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private IndexInfo translateResultSet(final ResultSet rs, final DataSourceName dataSourceName) throws SQLException {
+    @Override
+    public List<IndexInfo> fetchAllIndexes(final DataSourceName dataSourceName, final String sql) {
+        validateSQL(sql);
+        DataSourceProperties dataSource = configFactory.get(dataSourceName);
+        List<IndexInfo> indexes = new ArrayList<>();
+
+        try (Connection conn = createConnection(dataSource);
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                indexes.add(mapToIndexInfo(rs, dataSourceName));
+            }
+        } catch (SQLException ex) {
+            Log.errorf("Error fetching all indexes: %s", sql, ex);
+            throw new RuntimeException("Error fetching all indexes", ex);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return indexes;
+    }
+
+    @Override
+    public void executeDDLCommand(final DataSourceName dataSourceName, final String ddl) throws Exception {
+        validateDDL(ddl);
+        DataSourceProperties dataSource = configFactory.get(dataSourceName);
+
+        try (Connection conn = createConnection(dataSource);
+             var statement = conn.createStatement()) {
+            conn.setAutoCommit(true);
+            statement.execute(ddl);
+        } catch (SQLException ex) {
+            Log.errorf("Error executing DDL: %s", ddl, ex);
+            throw new RuntimeException("Error executing DDL", ex);
+        }
+    }
+
+    private Connection createConnection(final DataSourceProperties dataSource) throws Exception {
+        return connectionFactory.getConnectionByType(dataSource.getProperties().dbType())
+                .createConnection(dataSource.getProperties());
+    }
+
+    private IndexInfo mapToIndexInfo(
+            final ResultSet rs,
+            final DataSourceName dataSourceName) throws SQLException {
         return IndexInfo.builder()
                 .dataSource(dataSourceName)
                 .schemaName(new SchemaName(rs.getString("schema_name")))
@@ -57,43 +101,13 @@ public class DataBaseCommandJDBC implements DataBaseCommand {
                 .bloatRatio(new BloatRatio(rs.getDouble("bloat_ratio")))
                 .ddl(new DDLDefinition(rs.getString("ddl")))
                 .build();
-
     }
 
-    public List<IndexInfo> getAllIndex(final DataSourceName dataSourceName, final String sql) {
-
-        SQLInjectionMonitor.monitorSQLInjection(sql);
-
-        DataSourceProperties dataSource = dataSourceConfigFactory.get(dataSourceName);
-        List<IndexInfo> result = new ArrayList<>();
-
-        try (Connection conn = dataBaseConnectionFactory.get(dataSource.getProperties().dbType()).createConnection(dataSource.getProperties());
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                result.add(translateResultSet(rs, dataSourceName));
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException("Error executing SQL: " + sql, ex);
-        }
-        return result;
+    private void validateSQL(final String sql) {
+        SQLInjectionMonitor.validateSQLQuery(sql);
     }
 
-    public void executeDDL(final DataSourceName dataSourceName, final String ddl) throws Exception {
-
-        SQLInjectionMonitor.monitorDDLInjection(ddl);
-
-        DataSourceProperties dataSource = dataSourceConfigFactory.get(dataSourceName);
-
-        try (Connection connection = dataBaseConnectionFactory.get(dataSource.getProperties().dbType())
-                .createConnection(dataSource.getProperties())) {
-
-            connection.setAutoCommit(true);
-            try (var statement = connection.createStatement()) {
-                statement.execute(ddl);
-            } catch (Exception e) {
-                throw e;
-            }
-        }
+    private void validateDDL(final String ddl) {
+        SQLInjectionMonitor.validateDDLInjection(ddl);
     }
 }

@@ -8,7 +8,11 @@ import br.com.hbbucker.usecase.bloat.FindBloatedIndexesUC;
 import br.com.hbbucker.usecase.find.datasource.FindAllDataSourcesUC;
 import br.com.hbbucker.usecase.staus.GetStatusIndexProcessUC;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 @Path("/index-maintenance/")
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
-public class IndexController {
+public final class IndexController {
 
     private final ProducerTemplate producerTemplate;
     private final FindBloatedIndexesUC findBloatedIndexes;
@@ -31,27 +35,36 @@ public class IndexController {
     @POST
     @Path("{dataSource}/index/recreate/all")
     public Response startMaintenance(
-            @PathParam("dataSource") DataSourceName dataSourceName) {
+            final @PathParam("dataSource") DataSourceName dataSourceName) {
 
+        CompletableFuture.runAsync(() -> producerTemplate.sendBodyAndHeaders(
+                "direct:rebuild-indexes", (Object) null, createHeaders(dataSourceName, null, null)));
+        return Response.accepted("Index maintenance pipeline started.").build();
+    }
+
+    private Map<String, Object> createHeaders(
+            final DataSourceName dataSourceName,
+            final SchemaName schemaName,
+            final IndexName indexName) {
         Map<String, Object> headers = new HashMap<>();
         headers.put("x-datasource-name", dataSourceName);
-
-        CompletableFuture.runAsync(() -> producerTemplate.sendBodyAndHeaders("direct:rebuild-indexes", (Object) null, headers));
-        return Response.accepted("Index maintenance pipeline started.").build();
+        if (schemaName != null) {
+            headers.put("x-schema-name", schemaName);
+        }
+        if (indexName != null) {
+            headers.put("x-index-name", indexName);
+        }
+        return headers;
     }
 
     @POST
     @Path("{dataSource}/index/recreate/{schemaName}/{indexName}")
     public Response startIndex(
-            @PathParam("dataSource") DataSourceName dataSourceName,
-            @PathParam("schemaName") SchemaName schemaName,
-            @PathParam("indexName") IndexName indexName) {
+            final @PathParam("dataSource") DataSourceName dataSourceName,
+            final @PathParam("schemaName") SchemaName schemaName,
+            final @PathParam("indexName") IndexName indexName) {
 
-        Map<String, Object> headers = new HashMap<>();
-        headers.put("x-datasource-name", dataSourceName);
-        headers.put("x-schema-name", schemaName);
-        headers.put("x-index-name", indexName);
-
+        Map<String, Object> headers = createHeaders(dataSourceName, schemaName, indexName);
         CompletableFuture.runAsync(() -> producerTemplate.sendBodyAndHeaders("direct:rebuild-index", (Object) null, headers));
         return Response.accepted("Index maintenance pipeline started.").build();
     }
@@ -59,7 +72,7 @@ public class IndexController {
     @GET
     @Path("{dataSource}/index/bloated")
     public Response getBloated(
-            @PathParam("dataSource") DataSourceName dataSourceName) {
+            final @PathParam("dataSource") DataSourceName dataSourceName) {
 
         try {
             return Response.ok(findBloatedIndexes.execute(new FindBloatedIndexesInput(dataSourceName))).build();
