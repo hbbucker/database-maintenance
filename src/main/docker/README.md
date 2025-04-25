@@ -48,8 +48,9 @@ To run the application, use the following command:
 docker run -dit \
   --name index-maintenance-app \
   -p 8080:8080 \
-  -v "./environment/database-docker-local.conf:/app/database.conf" \ 
-  -e DATABASE_CONFIG_FILE=/app/database.conf database-maintenance
+  -v "$(pwd)/index-maintenance.conf:/app/database.conf" \
+  -e DATABASE_CONFIG_FILE=/app/database.conf \
+  hbbucker/index-maintenance
 
 ```
 
