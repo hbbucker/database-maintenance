@@ -10,8 +10,8 @@ const IndexMaintenancePage = () => {
 
   return (
     <Layout activeView={activeView} onViewChange={setActiveView}>
-      <div className="flex flex-col min-h-[calc(100vh-4rem)]">
-        <div className="flex-grow">
+      <div className="flex flex-col h-[calc(100vh-4rem)]">
+        <div className="flex-grow overflow-hidden flex flex-col">
           {activeView === "indexes" ? (
             <BloatedIndexesView />
           ) : (

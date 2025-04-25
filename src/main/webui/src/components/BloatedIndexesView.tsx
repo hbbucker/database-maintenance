@@ -149,24 +149,26 @@ export function BloatedIndexesView() {
   if (error) return <div>Erro ao carregar dados</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="flex flex-col h-full">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Índices Inchados</h2>
         <Button onClick={() => refetch()} variant="outline" size="sm">
           <RefreshCw className="h-4 w-4 mr-2" />
           Atualizar Lista
         </Button>
       </div>
-      <BloatedIndexesTable
-        sortedIndexes={sortedIndexes}
-        isLoading={isLoading}
-        handleSort={handleSort}
-        handleRecreateIndex={handleRecreateIndex}
-        recreateIndexPending={recreateIndexMutation.isPending}
-        getStatusForIndex={getStatusForIndex}
-        isProcessing={isProcessing}
-        isFailed={isFailed}
-      />
+      <div className="flex-grow overflow-hidden">
+        <BloatedIndexesTable
+          sortedIndexes={sortedIndexes}
+          isLoading={isLoading}
+          handleSort={handleSort}
+          handleRecreateIndex={handleRecreateIndex}
+          recreateIndexPending={recreateIndexMutation.isPending}
+          getStatusForIndex={getStatusForIndex}
+          isProcessing={isProcessing}
+          isFailed={isFailed}
+        />
+      </div>
     </div>
   );
 }

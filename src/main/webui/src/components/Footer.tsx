@@ -3,7 +3,7 @@ import { Linkedin, Github } from "lucide-react";
 import React from "react";
 
 const Footer = () => (
-  <footer className="border-t mt-8 pt-4 text-center text-xs text-muted-foreground flex justify-center items-center space-x-4">
+  <footer className="border-t py-2 text-center text-xs text-muted-foreground flex justify-center items-center space-x-4 mt-auto">
     <div>by: Hugo B. Bucker</div>
     <a 
       href="https://www.linkedin.com/in/hugo-bastos-bucker/" 
