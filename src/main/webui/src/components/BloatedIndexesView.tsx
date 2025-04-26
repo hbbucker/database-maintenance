@@ -2,22 +2,11 @@ import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BloatedIndexesTable from "./bloated-indexes/BloatedIndexesTable";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getBloatedIndexes, recreateIndex, getDataSources } from "@/services/api";
+import { getBloatedIndexes, recreateIndex, getDataSources, getIndexStatus } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo, useEffect } from "react";
-import { IndexInfo } from "@/types";
+import {IndexInfo, IndexStatusItem} from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface IndexStatusItem {
-  dataSourceName: { name: string };
-  tableName: { name: string };
-  indexName: { name: string };
-  status: { status: string };
-}
-
-interface IndexStatusResponse {
-  indexProcessing: IndexStatusItem[];
-}
 
 export function BloatedIndexesView() {
   const { toast } = useToast();
@@ -39,24 +28,60 @@ export function BloatedIndexesView() {
 
   useEffect(() => {
     let isMounted = true;
-    async function fetchStatus() {
-      try {
-        const response = await fetch("/index-maintenance/index/status");
-        if (response.ok) {
-          const json: IndexStatusResponse = await response.json();
-          if (isMounted) setIndexStatus(json.indexProcessing || []);
-        }
-      } catch (e) {
-        // ignora erros silenciosamente
+    let previousStatusMap = new Map<string, string>();
+
+    const createStatusKey = (statusItem: IndexStatusItem) =>
+      [statusItem.dataSourceName.name, statusItem.tableName.name, statusItem.indexName.name].join("__");
+
+    const handleStatusChange = (statusItem: IndexStatusItem, previousStatus: string | undefined) => {
+      if (/failed/i.test(statusItem.status.status)) {
+        toast({
+          title: "Erro",
+          description: `Índice ${statusItem.indexName.name} falhou no processamento.`,
+          variant: "destructive",
+        });
+      } else if (/sucessfully/i.test(statusItem.status.status)) {
+        toast({
+          title: "Sucesso",
+          description: `Índice ${statusItem.indexName.name} processado com sucesso.`,
+        });
       }
-    }
+    };
+
+    const updateStatusMap = (response: any) => {
+      const newStatusMap = new Map<string, string>();
+      response.indexProcessing.forEach((statusItem: IndexStatusItem) => {
+        const key = createStatusKey(statusItem);
+        newStatusMap.set(key, statusItem.status.status);
+
+        const previousStatus = previousStatusMap.get(key);
+        if (previousStatus !== statusItem.status.status) {
+          handleStatusChange(statusItem, previousStatus);
+        }
+      });
+      previousStatusMap = newStatusMap;
+      setIndexStatus(response.indexProcessing || []);
+    };
+
+    const fetchStatus = async () => {
+      try {
+        const response = await getIndexStatus();
+        if (isMounted) {
+          updateStatusMap(response);
+        }
+      } catch {
+        // Silently ignore errors
+      }
+    };
+
     fetchStatus();
     const interval = setInterval(fetchStatus, 5000);
+
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [toast]);
 
   const indexStatusMap = useMemo(() => {
     const map = new Map<string, IndexStatusItem>();

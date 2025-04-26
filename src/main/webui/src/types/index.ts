@@ -76,3 +76,15 @@ export interface IndexInfo {
 export interface IndexResponse {
   indexInfos: IndexInfo[];
 }
+
+export interface IndexStatusItem {
+  dataSourceName: { name: string };
+  tableName: { name: string };
+  indexName: { name: string };
+  status: { status: string };
+}
+
+export interface IndexStatusResponse {
+  indexProcessing: IndexStatusItem[];
+}
+

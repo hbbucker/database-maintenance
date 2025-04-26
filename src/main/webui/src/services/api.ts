@@ -1,5 +1,4 @@
-
-import { IndexResponse, DataSourceResponse } from "@/types";
+import {IndexResponse, DataSourceResponse, IndexStatusResponse} from "@/types";
 
 // Using relative URLs to work with the proxy in development mode
 export async function getDataSources(): Promise<DataSourceResponse> {
@@ -36,4 +35,12 @@ export async function recreateAllIndexes(dataSource: string): Promise<void> {
   if (!response.ok) {
     throw new Error('Falha ao recriar todos os índices');
   }
+}
+
+export async function getIndexStatus(): Promise<IndexStatusResponse> {
+  const response = await fetch(`/index-maintenance/index/status`);
+  if (!response.ok) {
+    throw new Error("Falha ao buscar status dos índices");
+  }
+  return response.json();
 }
