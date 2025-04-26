@@ -81,6 +81,8 @@ final class PostgreSQLHelper {
                  , last_idx_scan
                  , idx_tup_fetch
                  , idx_tup_read
+                 , pg_relation_size((ix.schema_name || '.' || index_name)::regclass) as idx_size
+                 , pg_relation_size((ix.schema_name || '.' || table_name)::regclass) as tbl_size
               FROM ix
               JOIN pg_stat_all_indexes psai ON psai.schemaname = ix.schema_name
                                            AND psai.relname = ix.table_name

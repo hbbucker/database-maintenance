@@ -22,13 +22,13 @@ interface LayoutProps {
 export function Layout({ activeView, onViewChange, children }: LayoutProps) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="h-screen flex w-full">
         <Sidebar>
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Navegação</SidebarGroupLabel>
+              <SidebarGroupLabel className="pt-24">Navegação</SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="pt-10">
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       onClick={() => onViewChange("indexes")}
@@ -54,8 +54,8 @@ export function Layout({ activeView, onViewChange, children }: LayoutProps) {
             </SidebarGroup>
           </SidebarContent>
         </Sidebar>
-        <main className="flex-1">
-          <header className="bg-gradient-to-r from-[#7E69AB] to-[#9b87f5] text-white p-6 flex items-center justify-between shadow-md">
+        <main className="flex-1 flex flex-col">
+          <header className="bg-gradient-to-r from-[#7E69AB] to-[#9b87f5] text-white p-6 flex items-center justify-between shadow-md fixed top-0 left-0 right-0 z-50">
             <div className="flex items-center space-x-4">
               <Database className="h-8 w-8" />
               <h1 className="text-2xl font-bold tracking-wide">Database Maintenance</h1>
@@ -64,7 +64,7 @@ export function Layout({ activeView, onViewChange, children }: LayoutProps) {
               <ListFilter className="h-6 w-6" />
             </SidebarTrigger>
           </header>
-          <div className="p-8">
+          <div className="mt-24 p-8 flex-1 flex flex-col overflow-hidden">
             {children}
           </div>
         </main>

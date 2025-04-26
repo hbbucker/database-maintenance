@@ -1,12 +1,12 @@
-
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import BloatedIndexesTable from "./BloatedIndexesTable";
+import BloatedIndexesTable from "./bloated-indexes/BloatedIndexesTable";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getBloatedIndexes, recreateIndex, getDataSources } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo, useEffect } from "react";
 import { IndexInfo } from "@/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface IndexStatusItem {
   dataSourceName: { name: string };
@@ -25,10 +25,16 @@ export function BloatedIndexesView() {
   const [sortField, setSortField] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [indexStatus, setIndexStatus] = useState<IndexStatusItem[]>([]);
+  const [selectedDataSource, setSelectedDataSource] = useState<string>("");
 
   const { data: dataSourcesData } = useQuery({
     queryKey: ["dataSources"],
-    queryFn: getDataSources
+    queryFn: getDataSources,
+    onSuccess: (data) => {
+      if (data?.dataSources?.length > 0) {
+        setSelectedDataSource(data.dataSources[0].dataSourceName); // Set default to the first DataSource
+      }
+    },
   });
 
   useEffect(() => {
@@ -56,27 +62,19 @@ export function BloatedIndexesView() {
     const map = new Map<string, IndexStatusItem>();
     indexStatus.forEach((s) => {
       map.set(
-        [s.dataSourceName.name, s.tableName.name, s.indexName.name].join("__"),
-        s
+        [s.dataSourceName.name, s.tableName.name, s.indexName.name].join("__"), s
       );
     });
     return map;
   }, [indexStatus]);
 
   const { data: bloatedIndexesData, isLoading, error, refetch } = useQuery({
-    queryKey: ["bloatedIndexes"],
+    queryKey: ["bloatedIndexes", selectedDataSource],
     queryFn: async () => {
-      if (!dataSourcesData?.dataSources) return { indexInfos: [] };
-      const results = await Promise.all(
-        dataSourcesData.dataSources.map(ds => 
-          getBloatedIndexes(ds.dataSourceName)
-        )
-      );
-      return {
-        indexInfos: results.flatMap(result => result.indexInfos)
-      };
+      if (!selectedDataSource) return { indexInfos: [] };
+      return getBloatedIndexes(selectedDataSource);
     },
-    enabled: !!dataSourcesData?.dataSources
+    enabled: !!selectedDataSource,
   });
 
   const sortedIndexes = useMemo(() => {
@@ -84,11 +82,41 @@ export function BloatedIndexesView() {
     const indexes = [...bloatedIndexesData.indexInfos];
     if (sortField) {
       indexes.sort((a: any, b: any) => {
-        let aValue = a[sortField]?.name || a[sortField]?.ratio || a[sortField]?.ddl;
-        let bValue = b[sortField]?.name || b[sortField]?.ratio || b[sortField]?.ddl;
-        if (typeof aValue === 'number') {
-          return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+        // Handle numeric values properly
+        if (sortField === 'totatIndexScan') {
+          return sortDirection === 'asc' 
+            ? a.totatIndexScan.value - b.totatIndexScan.value
+            : b.totatIndexScan.value - a.totatIndexScan.value;
         }
+        else if (sortField === 'totalIndexTuplesFetched') {
+          return sortDirection === 'asc'
+            ? a.totalIndexTuplesFetched.value - b.totalIndexTuplesFetched.value
+            : b.totalIndexTuplesFetched.value - a.totalIndexTuplesFetched.value;
+        }
+        else if (sortField === 'totalIndexTuplesRead') {
+          return sortDirection === 'asc'
+            ? a.totalIndexTuplesRead.value - b.totalIndexTuplesRead.value
+            : b.totalIndexTuplesRead.value - a.totalIndexTuplesRead.value;
+        }
+        else if (sortField === 'bloatRatio') {
+          return sortDirection === 'asc'
+            ? a.bloatRatio.ratio - b.bloatRatio.ratio
+            : b.bloatRatio.ratio - a.bloatRatio.ratio;
+        }
+        else if (sortField === 'lastTimeIndexUsed') {
+          return sortDirection === 'asc'
+            ? new Date(a.lastTimeIndexUsed.date).getTime() - new Date(b.lastTimeIndexUsed.date).getTime()
+            : new Date(b.lastTimeIndexUsed.date).getTime() - new Date(a.lastTimeIndexUsed.date).getTime();
+        }
+        else if (sortField === 'indexSize' || sortField === 'tableSize') {
+          return sortDirection === 'asc'
+            ? a[sortField].size - b[sortField].size
+            : b[sortField].size - a[sortField].size;
+        }
+        
+        // Default string comparison for other fields
+        let aValue = a[sortField]?.name || a[sortField]?.ddl;
+        let bValue = b[sortField]?.name || b[sortField]?.ddl;
         return sortDirection === 'asc' 
           ? String(aValue).localeCompare(String(bValue))
           : String(bValue).localeCompare(String(aValue));
@@ -104,7 +132,7 @@ export function BloatedIndexesView() {
       queryClient.invalidateQueries({ queryKey: ["bloatedIndexes"] });
       toast({
         title: "Sucesso",
-        description: "Índice recriado com sucesso",
+        description: "Índice sendo recriado com sucesso",
       });
     },
     onError: () => {
@@ -151,13 +179,27 @@ export function BloatedIndexesView() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Índices Inchados</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-xl font-semibold">Índices Inchados</h2>
+          <Select onValueChange={setSelectedDataSource} value={selectedDataSource}>
+            <SelectTrigger className="w-64">
+              <SelectValue placeholder="Selecione um DataSource" />
+            </SelectTrigger>
+            <SelectContent>
+              {dataSourcesData?.dataSources.map((ds) => (
+                <SelectItem key={ds.dataSourceName} value={ds.dataSourceName}>
+                  {ds.dataSourceName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button onClick={() => refetch()} variant="outline" size="sm">
           <RefreshCw className="h-4 w-4 mr-2" />
           Atualizar Lista
         </Button>
       </div>
-      <div className="flex-grow overflow-hidden">
+      <div className="flex-1 min-h-0">
         <BloatedIndexesTable
           sortedIndexes={sortedIndexes}
           isLoading={isLoading}
@@ -167,8 +209,11 @@ export function BloatedIndexesView() {
           getStatusForIndex={getStatusForIndex}
           isProcessing={isProcessing}
           isFailed={isFailed}
+          sortField={sortField}
+          sortDirection={sortDirection}
         />
       </div>
     </div>
   );
 }
+
