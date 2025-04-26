@@ -34,6 +34,30 @@ export interface DataSourceResponse {
   dataSources: DataSourceInfo[];
 }
 
+export interface TotalIndexScan {
+  value: number;
+}
+
+export interface LastTimeIndexUsed {
+  date: string;
+}
+
+export interface TotalIndexTuplesFetched {
+  value: number;
+}
+
+export interface TotalIndexTuplesRead {
+  value: number;
+}
+
+export interface IndexSize {
+  size: number;
+}
+
+export interface TableSize {
+  size: number;
+}
+
 export interface IndexInfo {
   dataSource: DataSource;
   schemaName: SchemaName;
@@ -41,8 +65,26 @@ export interface IndexInfo {
   tableName: TableName;
   bloatRatio: BloatRatio;
   ddl: DDL;
+  totatIndexScan: TotalIndexScan;
+  lastTimeIndexUsed: LastTimeIndexUsed;
+  totalIndexTuplesFetched: TotalIndexTuplesFetched;
+  totalIndexTuplesRead: TotalIndexTuplesRead;
+  indexSize: IndexSize;
+  tableSize: TableSize;
 }
 
 export interface IndexResponse {
   indexInfos: IndexInfo[];
 }
+
+export interface IndexStatusItem {
+  dataSourceName: { name: string };
+  tableName: { name: string };
+  indexName: { name: string };
+  status: { status: string };
+}
+
+export interface IndexStatusResponse {
+  indexProcessing: IndexStatusItem[];
+}
+

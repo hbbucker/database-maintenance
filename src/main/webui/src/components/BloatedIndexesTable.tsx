@@ -1,11 +1,11 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Loader, X } from "lucide-react";
+import { RefreshCw, Loader, X, ArrowUp, ArrowDown } from "lucide-react";
 import { IndexInfo } from "@/types";
 import React, { useState } from "react";
+import { format } from "date-fns";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -34,6 +34,8 @@ type Props = {
   getStatusForIndex: (index: IndexInfo) => IndexStatusItem | undefined;
   isProcessing: (statusItem?: IndexStatusItem) => boolean;
   isFailed: (statusItem?: IndexStatusItem) => boolean;
+  sortField?: string;
+  sortDirection?: "asc" | "desc";
 };
 
 const columns = [
@@ -42,6 +44,12 @@ const columns = [
   { field: "indexName", label: "Índice" },
   { field: "tableName", label: "Tabela" },
   { field: "bloatRatio", label: "Ratio" },
+  { field: "tableSize", label: "Tam. Tabela" },
+  { field: "indexSize", label: "Tam. Índice" },
+  { field: "totatIndexScan", label: "Total Scans" },
+  { field: "lastTimeIndexUsed", label: "Último Uso" },
+  { field: "totalIndexTuplesFetched", label: "Tuplas Obtidas" },
+  { field: "totalIndexTuplesRead", label: "Tuplas Lidas" },
   { field: "ddl", label: "DDL" },
 ];
 
@@ -54,13 +62,22 @@ export default function BloatedIndexesTable({
   getStatusForIndex,
   isProcessing,
   isFailed,
+  sortField,
+  sortDirection
 }: Props) {
   const [dialogOpenIndex, setDialogOpenIndex] = useState<number | null>(null);
 
-  // handler para confirmar ação perigosa
   const handleConfirmRecreate = (index: IndexInfo) => {
     handleRecreateIndex(index);
     setDialogOpenIndex(null);
+  };
+
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), "yyyy-MM-dd HH:mm:ss");
+  };
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat().format(num);
   };
 
   return (
@@ -79,6 +96,11 @@ export default function BloatedIndexesTable({
                       className="flex items-center gap-1"
                     >
                       {label}
+                      {sortField === field && (
+                        sortDirection === "asc" ? 
+                          <ArrowUp className="ml-1 h-4 w-4" /> : 
+                          <ArrowDown className="ml-1 h-4 w-4" />
+                      )}
                     </Button>
                   </TableHead>
                 ))}
@@ -87,13 +109,14 @@ export default function BloatedIndexesTable({
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">Carregando...</TableCell>
+                  <TableCell colSpan={13} className="text-center">Carregando...</TableCell>
                 </TableRow>
               ) : sortedIndexes.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">Nenhum índice encontrado.</TableCell>
+                  <TableCell colSpan={13} className="text-center">Nenhum índice encontrado.</TableCell>
                 </TableRow>
-              ) : sortedIndexes.map((index, i) => {
+              ) : (
+                sortedIndexes.map((index, i) => {
                   const statusItem = getStatusForIndex(index);
                   const processing = isProcessing(statusItem);
                   const failed = isFailed(statusItem);
@@ -176,10 +199,17 @@ export default function BloatedIndexesTable({
                       <TableCell className="whitespace-nowrap">{index.indexName.name}</TableCell>
                       <TableCell className="whitespace-nowrap">{index.tableName.name}</TableCell>
                       <TableCell className="whitespace-nowrap">{(index.bloatRatio.ratio * 100).toFixed(2)}%</TableCell>
-                      <TableCell className="font-mono text-xs max-w-xs truncate">{index.ddl.ddl}</TableCell>
+                      <TableCell className="whitespace-nowrap">{formatNumber(index.tableSize.size)}</TableCell>
+                      <TableCell className="whitespace-nowrap">{formatNumber(index.indexSize.size)}</TableCell>
+                      <TableCell className="whitespace-nowrap">{formatNumber(index.totatIndexScan.value)}</TableCell>
+                      <TableCell className="whitespace-nowrap">{formatDate(index.lastTimeIndexUsed.date)}</TableCell>
+                      <TableCell className="whitespace-nowrap">{formatNumber(index.totalIndexTuplesFetched.value)}</TableCell>
+                      <TableCell className="whitespace-nowrap">{formatNumber(index.totalIndexTuplesRead.value)}</TableCell>
+                      <TableCell className="font-mono text-xs whitespace-pre-wrap max-w-md">{index.ddl.ddl}</TableCell>
                     </TableRow>
                   );
-              })}
+                })
+              )}
             </TableBody>
           </Table>
         </div>

@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Duration;
 import java.util.Set;
 
 @ApplicationScoped
@@ -24,6 +25,16 @@ public final class CacheStatusService {
             final ProcessStatus status) {
 
         cache.put(getKey(dataSourceName, tableName, indexName), status);
+    }
+
+    public void put(
+            final DataSourceName dataSourceName,
+            final TableName tableName,
+            final IndexName indexName,
+            final ProcessStatus status,
+            final Duration ttl) {
+
+        cache.put(getKey(dataSourceName, tableName, indexName), status, ttl);
     }
 
     public ProcessStatus get(

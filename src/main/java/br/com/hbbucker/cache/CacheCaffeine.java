@@ -5,15 +5,19 @@ import io.quarkus.cache.CaffeineCache;
 import io.quarkus.logging.Log;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public abstract class CacheCaffeine<T> implements CacheInterface<T> {
     private final Cache cache;
+    private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
     /**
      * Put a value in the cache.
@@ -26,6 +30,24 @@ public abstract class CacheCaffeine<T> implements CacheInterface<T> {
         CompletableFuture<T> valueFuture = CompletableFuture.completedFuture(value);
         cache.as(CaffeineCache.class).put(key, valueFuture);
 
+    }
+
+    /**
+     * Put a value in the cache with a time to live (TTL).
+     *
+     * @param key
+     * @param value
+     * @param ttl
+     */
+    @Override
+    public void put(final String key, final T value, final Duration ttl) {
+        CompletableFuture<T> valueFuture = CompletableFuture.completedFuture(value);
+        cache.as(CaffeineCache.class).put(key, valueFuture);
+
+        scheduledExecutorService.schedule(() -> {
+            remove(key);
+            Log.info("Cache invalidated for key: " + key);
+        }, ttl.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS);
     }
 
     /**

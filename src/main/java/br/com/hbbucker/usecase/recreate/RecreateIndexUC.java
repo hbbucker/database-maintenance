@@ -18,10 +18,13 @@ import lombok.SneakyThrows;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
+import java.time.Duration;
+
 @ApplicationScoped
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public final class RecreateIndexUC implements Usecase<RecreateIndexInput, Void>, Processor {
 
+    public static final int TTL_SECONDS = 20;
     private final DataBaseMaintenanceFactory dataBaseMaintenanceFactory;
     private final DataSourceConfigFactory dataSourceConfigFactory;
     private final CacheStatusService cacheStatusService;
@@ -46,7 +49,7 @@ public final class RecreateIndexUC implements Usecase<RecreateIndexInput, Void>,
 
         try {
             recreateIndex(input, dataBaseMaintenance);
-            removeCacheStatus(input);
+            updateCacheStatus(input, "Sucessfully recreated index", Duration.ofSeconds(TTL_SECONDS));
             metrics.markSuccess();
         } catch (Exception e) {
             handleRecreationFailure(input, e);
@@ -99,6 +102,19 @@ public final class RecreateIndexUC implements Usecase<RecreateIndexInput, Void>,
                 input.index().getTableName(),
                 input.index().getIndexName(),
                 new ProcessStatus(statusMessage)
+        );
+    }
+
+    private void updateCacheStatus(
+            final RecreateIndexInput input,
+            final String statusMessage,
+            final Duration ttl) {
+        cacheStatusService.put(
+                input.dataSourceName(),
+                input.index().getTableName(),
+                input.index().getIndexName(),
+                new ProcessStatus(statusMessage),
+                ttl
         );
     }
 

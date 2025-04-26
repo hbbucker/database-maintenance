@@ -18,6 +18,12 @@ public final class IndexInfo {
     private TableName tableName;
     private BloatRatio bloatRatio;
     private DDLDefinition ddl;
+    private TotalIndexScan totatIndexScan;
+    private LastTimeIndexUsed lastTimeIndexUsed;
+    private TotalIndexTuplesFetched totalIndexTuplesFetched;
+    private TotalIndexTuplesRead totalIndexTuplesRead;
+    private IndexSize indexSize;
+    private TableSize tableSize;
 
     public String refactorCreateIndex(final String oldValue, final String newValue) {
         return ddl.ddl().replace(oldValue, newValue);
