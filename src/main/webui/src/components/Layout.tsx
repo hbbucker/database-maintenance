@@ -12,6 +12,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Database, ListFilter } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface LayoutProps {
   activeView: "indexes" | "datasources";
@@ -55,14 +56,17 @@ export function Layout({ activeView, onViewChange, children }: LayoutProps) {
           </SidebarContent>
         </Sidebar>
         <main className="flex-1 flex flex-col">
-          <header className="bg-gradient-to-r from-[#7E69AB] to-[#9b87f5] text-white p-6 flex items-center justify-between shadow-md fixed top-0 left-0 right-0 z-50">
+          <header className="bg-gradient-to-r from-[#7E69AB] to-[#9b87f5] dark:from-[#372f4c] dark:to-[#554188] text-white p-6 flex items-center justify-between shadow-md fixed top-0 left-0 right-0 z-50">
             <div className="flex items-center space-x-4">
               <Database className="h-8 w-8" />
               <h1 className="text-2xl font-bold tracking-wide">Database Maintenance</h1>
             </div>
-            <SidebarTrigger className="hover:bg-purple-600 p-2 rounded-full transition-colors">
-              <ListFilter className="h-6 w-6" />
-            </SidebarTrigger>
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <SidebarTrigger className="hover:bg-purple-600 p-2 rounded-full transition-colors">
+                <ListFilter className="h-6 w-6" />
+              </SidebarTrigger>
+            </div>
           </header>
           <div className="mt-24 p-8 flex-1 flex flex-col overflow-hidden">
             {children}
