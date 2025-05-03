@@ -41,7 +41,7 @@ export function TableRow({
 
   return (
     <UITableRow className="hover:bg-muted transition">
-      <TableCell>
+      <TableCell className="sticky left-0 bg-background">
         <ActionCell
           index={index}
           dialogOpenIndex={dialogOpenIndex}
