@@ -11,6 +11,7 @@ WORKDIR /workspace
 
 # Copy the Maven project files
 COPY pom.xml ./
+COPY checkstyle.xml ./
 COPY src ./src
 COPY .mvn ./.mvn
 COPY mvnw ./

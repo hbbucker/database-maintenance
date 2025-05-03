@@ -21,6 +21,10 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Verify version
+        run: |
+          mvn clean verify
+
       # Increment version in pom.xml
       - name: Increment version in pom.xml
         id: increment-version
