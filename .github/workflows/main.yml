@@ -1,1 +1,59 @@
+name: Build and Push Docker Image
 
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Java environment
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # Increment version in pom.xml
+      - name: Increment version in pom.xml
+        id: increment-version
+        run: |
+          current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          new_version=$(echo $current_version | awk -F. '{$NF+=1; OFS="."; print $0}')
+          mvn versions:set -DnewVersion=$new_version
+          echo "new_version=$new_version" >> $GITHUB_ENV
+
+      # Commit the updated pom.xml
+      - name: Commit updated version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pom.xml
+          git commit -m "Increment version to ${{ env.new_version }}"
+          git push origin master
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -f src/main/docker/Dockerfile -t hbbucker/index-maintenance:${{ env.new_version }} .
+          docker tag hbbucker/index-maintenance:${{ env.new_version }} hbbucker/index-maintenance:latest
+
+      # Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Push Docker image
+      - name: Push Docker image
+        run: |
+          docker push hbbucker/index-maintenance:${{ env.new_version }}
+          docker push hbbucker/index-maintenance:latest

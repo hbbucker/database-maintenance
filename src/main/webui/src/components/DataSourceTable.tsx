@@ -18,12 +18,12 @@ export default function DataSourceTable({ dataSources, recreateAll, recreateAllP
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Ação</TableHead>
-            <TableHead>Data Source Name</TableHead>
-            <TableHead>DB Type</TableHead>
-            <TableHead>Database</TableHead>
-            <TableHead>Host</TableHead>
-            <TableHead>Port</TableHead>
+            <TableHead className="w-1/8">Ação</TableHead>
+            <TableHead className="w-1/4">Data Source Name</TableHead>
+            <TableHead className="w-1/8">DB Type</TableHead>
+            <TableHead className="w-1/8">Database</TableHead>
+            <TableHead className="w-1/3">Host</TableHead>
+            <TableHead className="w-1/12">Port</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
