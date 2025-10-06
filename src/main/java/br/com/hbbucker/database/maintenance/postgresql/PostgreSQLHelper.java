@@ -9,10 +9,7 @@ final class PostgreSQLHelper {
         //do nothing
     }
 
-    public static final String INDEX_CONCURRENTLY = "INDEX CONCURRENTLY %s";
-    public static final String DROP_INDEX = "DROP INDEX CONCURRENTLY IF EXISTS %s.%s";
-    public static final String ALTER_INDEX = "ALTER INDEX %s.%s RENAME TO %s";
-    public static final String INDEX = "INDEX %s";
+    public static final String REINDEX_CONCURRENTLY = "REINDEX INDEX CONCURRENTLY %s.%s";
 
     public static final String SQL_GET_INDEX_INFO = """
             SELECT schemaname as "schema_name"
@@ -31,10 +28,10 @@ final class PostgreSQLHelper {
             SELECT current_database()
                  , schemaname as schema_name
                  , tablename as table_name
-                 , ROUND((CASE WHEN otta=0 THEN 0.0 ELSE sml.relpages::float/otta END)::numeric,1) AS table_bloat_ratio
+                 , ROUND((CASE WHEN otta=0 THEN 0.0 ELSE sml.relpages::float/otta END)::numeric(6,3),1) AS table_bloat_ratio
                  , CASE WHEN relpages < otta THEN 0 ELSE bs*(sml.relpages-otta)::BIGINT END AS wasted_bytes
                  , iname AS index_name
-                 , ROUND((CASE WHEN iotta=0 OR ipages=0 THEN 0.0 ELSE ipages::float/iotta END)::numeric,1) AS bloat_ratio
+                 , ROUND((CASE WHEN iotta=0 OR ipages=0 THEN 0.0 ELSE ipages::float/iotta END)::numeric(6,3),1) AS bloat_ratio
                  , CASE WHEN ipages < iotta THEN 0 ELSE bs*(ipages-iotta) END AS wasted_index_bytes
               FROM (SELECT schemaname
                          , tablename
@@ -87,7 +84,6 @@ final class PostgreSQLHelper {
               JOIN pg_stat_all_indexes psai ON psai.schemaname = ix.schema_name
                                            AND psai.relname = ix.table_name
                                            AND psai.indexrelname = ix.index_name
-             WHERE bloat_ratio > 0.8
              ORDER BY wasted_index_bytes DESC
             """;
 }
