@@ -49,7 +49,7 @@ public final class RecreateIndexUC implements Usecase<RecreateIndexInput, Void>,
 
         try {
             recreateIndex(input, dataBaseMaintenance);
-            updateCacheStatus(input, "Sucessfully recreated index", Duration.ofSeconds(TTL_SECONDS));
+            updateCacheStatus(input, "Successfully recreated index", Duration.ofSeconds(TTL_SECONDS));
             metrics.markSuccess();
         } catch (Exception e) {
             handleRecreationFailure(input, e);

@@ -50,9 +50,7 @@ public final class PostgreSQLDataBaseMaintenance implements DataBaseMaintenance 
             final DataSourceName dataSourceName,
             final IndexInfo indexInfo) {
         String newName = "%s_new".formatted(indexInfo.getIndexName().name());
-        String newDDL = indexInfo.refactorCreateIndex(
-                PostgreSQLHelper.INDEX.formatted(indexInfo.getIndexName().name()),
-                PostgreSQLHelper.INDEX_CONCURRENTLY.formatted(newName));
+        String newDDL = PostgreSQLHelper.REINDEX_CONCURRENTLY.formatted(indexInfo.getSchemaName().name(), indexInfo.getIndexName().name());
         try {
             Log.infof("Recreating index: %s", newDDL);
 
@@ -68,7 +66,7 @@ public final class PostgreSQLDataBaseMaintenance implements DataBaseMaintenance 
 
         } catch (Exception e) {
             logAndThrow("Failed to recreate index: " + indexInfo.getIndexName(), e);
-            return null; // Unreachable, but required for compilation.
+            return null;
         }
     }
 
@@ -76,18 +74,8 @@ public final class PostgreSQLDataBaseMaintenance implements DataBaseMaintenance 
     public void deleteIndex(
             final DataSourceName dataSourceName,
             final IndexInfo indexInfo) {
-        try {
-            Log.infof("Droping old index: %s.%s",
-                    indexInfo.getSchemaName().name(),
-                    indexInfo.getIndexName().name());
 
-            dataBaseCommand.executeDDLCommand(
-                    dataSourceName,
-                    PostgreSQLHelper.DROP_INDEX
-                            .formatted(indexInfo.getSchemaName().name(), indexInfo.getIndexName().name()));
-        } catch (Exception e) {
-            logAndThrow("Failed to drop index: " + indexInfo.getIndexName().name(), e);
-        }
+        //do nothing
     }
 
     @Override
@@ -95,19 +83,7 @@ public final class PostgreSQLDataBaseMaintenance implements DataBaseMaintenance 
             final DataSourceName dataSourceName,
             final IndexName newName,
             final IndexInfo indexInfo) {
-        try {
-            Log.infof("Renaming index: %s -> %s.%s",
-                    newName.name(),
-                    indexInfo.getSchemaName().name(),
-                    indexInfo.getIndexName().name());
-
-            dataBaseCommand.executeDDLCommand(
-                    dataSourceName,
-                    PostgreSQLHelper.ALTER_INDEX
-                            .formatted(indexInfo.getSchemaName().name(), newName.name(), indexInfo.getIndexName().name()));
-        } catch (Exception e) {
-            logAndThrow("Failed to rename index: " + indexInfo.getIndexName().name(), e);
-        }
+        //do nothing
     }
 
     @Override

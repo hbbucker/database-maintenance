@@ -24,8 +24,4 @@ public final class IndexInfo {
     private TotalIndexTuplesRead totalIndexTuplesRead;
     private IndexSize indexSize;
     private TableSize tableSize;
-
-    public String refactorCreateIndex(final String oldValue, final String newValue) {
-        return ddl.ddl().replace(oldValue, newValue);
-    }
 }
