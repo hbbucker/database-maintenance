@@ -1,0 +1,5 @@
+#!/bin/bash
+source ~/.bashrc
+nvm use v23.11.0
+export DATABASE_CONFIG_FILE=$(pwd)/../index-maintenance.conf
+mvn quarkus:dev -Dquarkus.http.port=8181

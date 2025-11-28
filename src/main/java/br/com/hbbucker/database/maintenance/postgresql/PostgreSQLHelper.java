@@ -28,10 +28,10 @@ final class PostgreSQLHelper {
             SELECT current_database()
                  , schemaname as schema_name
                  , tablename as table_name
-                 , ROUND((CASE WHEN otta=0 THEN 0.0 ELSE sml.relpages::float/otta END)::numeric(6,3),1) AS table_bloat_ratio
+                 , ROUND((CASE WHEN otta=0 THEN 0.0 ELSE sml.relpages::float/otta END)::numeric(16,3),3) AS table_bloat_ratio
                  , CASE WHEN relpages < otta THEN 0 ELSE bs*(sml.relpages-otta)::BIGINT END AS wasted_bytes
                  , iname AS index_name
-                 , ROUND((CASE WHEN iotta=0 OR ipages=0 THEN 0.0 ELSE ipages::float/iotta END)::numeric(6,3),1) AS bloat_ratio
+                 , ROUND((CASE WHEN iotta=0 OR ipages=0 THEN 0.0 ELSE ipages::float/iotta END)::numeric(16,3),3) AS bloat_ratio
                  , CASE WHEN ipages < iotta THEN 0 ELSE bs*(ipages-iotta) END AS wasted_index_bytes
               FROM (SELECT schemaname
                          , tablename
@@ -48,7 +48,7 @@ final class PostgreSQLHelper {
                                  , bs
                                  , schemaname
                                  , tablename
-                                 , (datawidth+(hdr+ma-(case when hdr%ma=0 THEN ma ELSE hdr%ma END)))::numeric AS datahdr
+                                 , (datawidth+(hdr+ma-(case when hdr%ma=0 THEN ma ELSE hdr%ma END)))::numeric(16,3) AS datahdr
                                  , (maxfracsum*(nullhdr+ma-(case when nullhdr%ma=0 THEN ma ELSE nullhdr%ma END))) AS nullhdr2
                               FROM (SELECT schemaname
                                          , tablename
@@ -70,7 +70,7 @@ final class PostgreSQLHelper {
                       JOIN pg_namespace nn ON cc.relnamespace = nn.oid AND nn.nspname = rs.schemaname AND nn.nspname <> 'information_schema'
                       LEFT JOIN pg_index i ON indrelid = cc.oid
                       LEFT JOIN pg_class c2 ON c2.oid = i.indexrelid
-                     WHERE NOT i.indisprimary) AS sml
+                     ) AS sml
              WHERE schemaname NOT IN ('pg_catalog'))
             SELECT ix.*
                  , pg_get_indexdef((ix.schema_name || '.' || index_name)::regclass) as ddl
